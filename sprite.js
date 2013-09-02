@@ -5,10 +5,15 @@
             this.image.src=src;
 
             this.xScale=this.yScale="100%";
+
+            this.angle=0;
         }
 
         Sprite.prototype.draw=function(context, x, y){
-            var xs=this.xScale, ys=this.yScale;
+            var xs=this.xScale,
+                ys=this.yScale,
+                xpos, ypos;
+
             if (!engine.isInt(this.xScale)){
                 xs=this.image.width*(parseInt(this.xScale)/100);
             }
@@ -17,7 +22,23 @@
                 ys=this.image.height*(parseInt(this.yScale)/100);
             }
 
-            context.drawImage(this.image, x, y, xs, ys);
+            if (this.angle==0){
+                xpos=x;
+                ypos=y;
+            }else{
+                context.save();
+                context.translate(x + xs/2 , y + ys/2);
+                context.rotate(this.angle);
+
+                xpos=-xs/2;
+                ypos=-ys/2;
+            }
+
+            context.drawImage(this.image, xpos, ypos, xs, ys);
+
+            if (this.angle!=0){
+                context.restore();
+            }
         };
 
         Sprite.prototype.getSourceSize=function(){

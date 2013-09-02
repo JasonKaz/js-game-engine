@@ -7,7 +7,6 @@
             this.context=this.canvas.getContext("2d");
             this.fps=fps;
             this.frame=1000/this.fps;
-            this.mainGameLoop=null;
 
             this.objects=[];
 
@@ -58,10 +57,8 @@
             function fireObjectsOnMouseDown(e){
                 for (var i= 0, _len=self.objects.length; i<_len; i++){
                     if (self.objects[i]){
-                        if (self.objects[i].onMouseDownFunction){
-                            if (self.objects[i].isWithinBoundingBox(self.getMousePos().x, self.getMousePos().y)){
-                                self.objects[i].onMouseDownFunction(e.which);
-                            }
+                        if (self.objects[i].onMouseDownFunction && self.objects[i].isWithinBoundingBox(self.getMousePos().x, self.getMousePos().y)){
+                            self.objects[i].onMouseDownFunction(e.which);
                         }
                     }
                 }
@@ -70,17 +67,21 @@
             function fireObjectsOnMousePress(e){
                 for (var i= 0, _len=self.objects.length; i<_len; i++){
                     if (self.objects[i]){
-                        if (self.objects[i].onMousePressFunction){
-                            if (self.objects[i].isWithinBoundingBox(self.getMousePos().x, self.getMousePos().y)){
-                                self.objects[i].onMousePressFunction(e.which);
-                            }
+                        if (self.objects[i].onMousePressFunction && self.objects[i].isWithinBoundingBox(self.getMousePos().x, self.getMousePos().y)){
+                            self.objects[i].onMousePressFunction(e.which);
                         }
                     }
                 }
             }
 
             function fireObjectsOnMouseUp(e){
-
+                for (var i= 0, _len=self.objects.length; i<_len; i++){
+                    if (self.objects[i]){
+                        if (self.objects[i].onMouseUpFunction && self.objects[i].isWithinBoundingBox(self.getMousePos().x, self.getMousePos().y)){
+                            self.objects[i].onMouseUpFunction(e.which);
+                        }
+                    }
+                }
             }
 
             document.onmousemove=function(e){

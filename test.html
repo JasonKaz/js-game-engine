@@ -23,11 +23,12 @@
 <script src="object.js"></script>
 <script src="engine.js"></script>
 <script>
-var cursorScale=100;
+var cursorScale=100, cursorAngle= 0, objAngle=0;
 
 var cross=new Sprite("crosshair.png");
 
-var engine=new engine("canvas", 120);
+var engine=new engine("canvas", 120),
+    obj=engine.createObject(new Sprite("sprite.png"), 0, 0);
 
 engine.onKeyPress(function(key){
     document.getElementById('last-key').innerHTML=key;
@@ -38,10 +39,19 @@ engine.onKeyPress(function(key){
         cursorScale+=3;
     }else if(key==87){
         cursorScale-=3;
+    }else if(key==65){
+        cursorAngle-=.1;
+        objAngle+=.15;
+    }else if(key==83){
+        cursorAngle+=.1;
+        objAngle-=.15;
     }
 
     cross.xScale=cursorScale+"%";
     cross.yScale=cursorScale+"%";
+    cross.angle=cursorAngle;
+
+    obj.sprite.angle=objAngle;
 }).onKeyUp(function(){
     document.getElementById('key-held').innerHTML="false";
 }).onMousePress(function(button){
@@ -52,7 +62,6 @@ engine.onKeyPress(function(key){
     document.getElementById('mouse-held').innerHTML="false";
 });
 
-var obj=engine.createObject(new Sprite("sprite.png"), 0, 0);
 obj.MoveSpeed=10;
 obj.sprite.xScale=obj.sprite.yScale="150";
 obj.onKeyDown(function(key){
