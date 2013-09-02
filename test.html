@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+            margin-left:400px;
+        }
+    </style>
+</head>
+<body>
+    <div style="position:absolute;left:0;top:0">
+        <div>Last Key Pressed <span id="last-key"></span></div>
+        <div>Key Being Held <span id="key-held"></span></div>
+        <div>Last Mouse Pressed <span id="last-mouse"></span></div>
+    </div>
+    <canvas id="canvas" width="500" height="500"></canvas>
+
+
+<script src="sprite.js"></script>
+<script src="object.js"></script>
+<script src="engine.js"></script>
+<script>
+var engine=new engine("canvas", 120);
+engine.onMouseDown(function(button){
+    document.getElementById('last-mouse').innerHTML=button;
+});
+
+var _obj;
+for(var i=0;i<100;i++){
+    _obj=engine.createObject(new Sprite("../tumblr_mhfh10fKmc1ro0rcoo1_500.jpg"), Math.random()*450, Math.random()*450);
+    _obj.sprite.xScale=_obj.sprite.yScale="15";
+    _obj.onMousePress(function(mouse){
+        this.destroy();
+    });
+}
+/*
+var obj=engine.createObject(new Sprite("../tumblr_mhfh10fKmc1ro0rcoo1_500.jpg"), 0, 0);
+obj.MoveSpeed=10;
+obj.sprite.xScale=obj.sprite.yScale="10";
+*/
+var cross=new Sprite("../GW2 CM/ICM Crosshair.png");
+cross.Scale=100;
+/*
+obj.onKeyDown(function(key){
+    switch (key){
+        case 37: this.x-=this.MoveSpeed; break;
+        case 38: this.y-=this.MoveSpeed; break;
+        case 39: this.x+=this.MoveSpeed; break;
+        case 40: this.y+=this.MoveSpeed; break;
+        case 81: cross.Scale-=3; break;
+        case 87: cross.Scale+=3; break;
+    }
+
+    cross.xScale=cross.Scale+"%";
+    cross.yScale=cross.Scale+"%";
+});
+
+obj.onMousePress(function(mouse){
+    this.destroy();
+});*/
+
+var mousePos;
+engine.main(function(){
+    mousePos=engine.getMousePos(true);
+
+    engine.drawSprite(cross, mousePos.x-(cross.getSize().width/2), mousePos.y-(cross.getSize().height/2));
+});
+</script>
+</body>
+</html>
