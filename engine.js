@@ -12,52 +12,62 @@
             this.objects=[];
 
             this.mousePos={x:0,y:0};
-            this.lastKeyDown=this.lastKeyUp=null;
 
-            this.onKeyDown=this.onKeyPress=this.onKeyUp=null;
-            this.pressingKey=false;
-            this.keyDownTimer=null;
+            this.holdingKey=false;
+            this.globalKeyPressFunction=this.globalKeyDownFunction=this.globalKeyUpFunction==null;
 
-            this.MOUSE_LEFT=1;
-            this.MOUSE_MIDDLE=2;
-            this.MOUSE_RIGHT=3;
+            this.holdingMouse=false;
+            this.globalMousePressFunction=this.globalMouseDownFunction=this.globalMouseUpFunction=null;
 
-            this.globalMouseDownFunction=null;
-
-            document.onmousemove=function(e){
-                self.mousePos.x= e.clientX;
-                self.mousePos.y= e.clientY;
+            this.mouse_keys={
+                MOUSE_LEFT  : 1,
+                MOUSE_MIDDLE: 2,
+                MOUSE_RIGHT : 3
             };
 
-            document.onkeydown=function(e){
-                self.lastKeyDown= e.which;
-
-                if (self.pressingKey==false){
-
+            function fireObjectsOnKeyDown(e){
+                for (var i= 0, _len=self.objects.length; i<_len; i++){
+                    if (self.objects[i]){
+                        if (self.objects[i].onKeyDownFunction){
+                            self.objects[i].onKeyDownFunction(e.which);
+                        }
+                    }
                 }
+            }
 
-                //self.keyDownTimer = setTimeout(function(){
-                    self.pressingKey=true;
+            function fireObjectsOnKeyPress(e){
+                for (var i= 0, _len=self.objects.length; i<_len; i++){
+                    if (self.objects[i]){
+                        if (self.objects[i].onKeyPressFunction){
+                            self.objects[i].onKeyPressFunction(e.which);
+                        }
+                    }
+                }
+            }
 
-                    for (var i= 0, _len=self.objects.length; i<_len; i++){
-                        if (self.objects[i]){
-                            if (self.objects[i].onKeyDownFunction){
-                                self.objects[i].onKeyDownFunction(e.which);
+            function fireObjectsOnKeyUp(e){
+                for (var i= 0, _len=self.objects.length; i<_len; i++){
+                    if (self.objects[i]){
+                        if (self.objects[i].onKeyUpFunction){
+                            self.objects[i].onKeyUpFunction(e.which);
+                        }
+                    }
+                }
+            }
+
+            function fireObjectsOnMouseDown(e){
+                for (var i= 0, _len=self.objects.length; i<_len; i++){
+                    if (self.objects[i]){
+                        if (self.objects[i].onMouseDownFunction){
+                            if (self.objects[i].isWithinBoundingBox(self.getMousePos().x, self.getMousePos().y)){
+                                self.objects[i].onMouseDownFunction(e.which);
                             }
                         }
                     }
-                //}, 10);
-            };
+                }
+            }
 
-            document.onkeyup = function(e){
-                self.pressingKey=false;
-                self.lastKeyUp= e.which;
-                clearTimeout(self.keyDownTimer);
-            };
-
-            document.onmousedown=function(e){
-                self.globalMouseDownFunction && self.globalMouseDownFunction(e.which);
-
+            function fireObjectsOnMousePress(e){
                 for (var i= 0, _len=self.objects.length; i<_len; i++){
                     if (self.objects[i]){
                         if (self.objects[i].onMousePressFunction){
@@ -67,10 +77,63 @@
                         }
                     }
                 }
+            }
+
+            function fireObjectsOnMouseUp(e){
+
+            }
+
+            document.onmousemove=function(e){
+                self.mousePos.x= e.clientX;
+                self.mousePos.y= e.clientY;
+            };
+
+            document.onkeydown=function(e){
+                if (self.holdingKey==false){
+                    self.globalKeyPressFunction && self.globalKeyPressFunction(e.which);
+                    self.globalKeyDownFunction && self.globalKeyDownFunction(e.which);
+
+                    fireObjectsOnKeyPress(e);
+                    fireObjectsOnKeyDown(e);
+
+                    self.holdingKey=true;
+                }else{
+                    self.globalKeyDownFunction && self.globalKeyDownFunction(e.which);
+
+                    fireObjectsOnKeyDown(e);
+                }
+            };
+
+            document.onkeyup = function(e){
+                self.globalKeyUpFunction && self.globalKeyUpFunction(e.which);
+
+                fireObjectsOnKeyUp(e);
+
+                self.holdingKey=false;
+            };
+
+            document.onmousedown=function(e){
+                if (self.holdingMouse==false){
+                    self.globalMousePressFunction && self.globalMousePressFunction(e.which);
+                    self.globalMouseDownFunction && self.globalMouseDownFunction(e.which);
+
+                    fireObjectsOnMousePress(e);
+                    fireObjectsOnMouseDown(e);
+
+                    self.holdingMouse=true;
+                }else{
+                    self.globalMouseDownFunction && self.globalMouseDownFunction(e.which);
+
+                    fireObjectsOnMousePress(e);
+                }
             };
 
             document.onmouseup=function(e){
+                self.globalMouseUpFunction && self.globalMouseUpFunction(e.which);
 
+                fireObjectsOnMouseUp(e);
+
+                self.holdingMouse=false;
             };
 
             document.onmouseover=function(e){
@@ -98,21 +161,26 @@
 
         engine.prototype.main=function(logic){
             var self=this;
+
             setInterval(function(){
+                //Clear the screen
                 self.redraw();
 
+                //Execute user logic
+                logic();
+
+                //Loop through all created objects
                 for (var i= 0, _len=self.objects.length; i<_len; i++){
                     if (self.objects[i]){
                         if (self.objects[i].destroyed==true){
-                            //self.objects.splice(i, 1);
+                            //'Destroy' the object if necessary
                             delete self.objects[i];
                         }else{
+                            //Draw active objects
                             self.objects[i].draw(self.context);
                         }
                     }
                 }
-
-                logic();
             }, this.frame);
         };
 
@@ -142,8 +210,37 @@
             };
         };
 
+        /*
+            Global event handlers
+         */
         engine.prototype.onMouseDown=function(f){
             this.globalMouseDownFunction=f;
+            return this;
+        };
+
+        engine.prototype.onMousePress=function(f){
+            this.globalMousePressFunction=f;
+            return this;
+        };
+
+        engine.prototype.onMouseUp=function(f){
+            this.globalMouseUpFunction=f;
+            return this;
+        };
+
+        engine.prototype.onKeyPress=function(f){
+            this.globalKeyPressFunction=f;
+            return this;
+        };
+
+        engine.prototype.onKeyDown=function(f){
+            this.globalKeyDownFunction=f;
+            return this;
+        };
+
+        engine.prototype.onKeyUp=function(f){
+            this.globalKeyUpFunction=f;
+            return this;
         };
 
         return engine;

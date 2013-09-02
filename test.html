@@ -14,6 +14,7 @@
         <div>Last Key Pressed <span id="last-key"></span></div>
         <div>Key Being Held <span id="key-held"></span></div>
         <div>Last Mouse Pressed <span id="last-mouse"></span></div>
+        <div>Mouse Being Held <span id="mouse-held"></span></div>
     </div>
     <canvas id="canvas" width="500" height="500"></canvas>
 
@@ -22,44 +23,62 @@
 <script src="object.js"></script>
 <script src="engine.js"></script>
 <script>
+var cursorScale=100;
+
+var cross=new Sprite("crosshair.png");
+
 var engine=new engine("canvas", 120);
-engine.onMouseDown(function(button){
+
+engine.onKeyPress(function(key){
+    document.getElementById('last-key').innerHTML=key;
+}).onKeyDown(function(key){
+    document.getElementById('key-held').innerHTML="true";
+
+    if (key==81){
+        cursorScale+=3;
+    }else if(key==87){
+        cursorScale-=3;
+    }
+
+    cross.xScale=cursorScale+"%";
+    cross.yScale=cursorScale+"%";
+}).onKeyUp(function(){
+    document.getElementById('key-held').innerHTML="false";
+}).onMousePress(function(button){
     document.getElementById('last-mouse').innerHTML=button;
+}).onMouseDown(function(){
+    document.getElementById('mouse-held').innerHTML="true";
+}).onMouseUp(function(){
+    document.getElementById('mouse-held').innerHTML="false";
 });
 
-var _obj;
-for(var i=0;i<100;i++){
-    _obj=engine.createObject(new Sprite("../tumblr_mhfh10fKmc1ro0rcoo1_500.jpg"), Math.random()*450, Math.random()*450);
-    _obj.sprite.xScale=_obj.sprite.yScale="15";
-    _obj.onMousePress(function(mouse){
-        this.destroy();
-    });
-}
-/*
-var obj=engine.createObject(new Sprite("../tumblr_mhfh10fKmc1ro0rcoo1_500.jpg"), 0, 0);
+var obj=engine.createObject(new Sprite("sprite.png"), 0, 0);
 obj.MoveSpeed=10;
-obj.sprite.xScale=obj.sprite.yScale="10";
-*/
-var cross=new Sprite("../GW2 CM/ICM Crosshair.png");
-cross.Scale=100;
-/*
+obj.sprite.xScale=obj.sprite.yScale="150";
 obj.onKeyDown(function(key){
+    keyBeingHeld=true;
+
     switch (key){
         case 37: this.x-=this.MoveSpeed; break;
         case 38: this.y-=this.MoveSpeed; break;
         case 39: this.x+=this.MoveSpeed; break;
         case 40: this.y+=this.MoveSpeed; break;
-        case 81: cross.Scale-=3; break;
-        case 87: cross.Scale+=3; break;
     }
-
-    cross.xScale=cross.Scale+"%";
-    cross.yScale=cross.Scale+"%";
+}).onKeyPress(function(key){
+    if (key==32){
+        this.x=Math.random()*500;
+        this.y=Math.random()*500;
+    }
+}).onKeyUp(function(key){
+    if (key==32){
+        this.x=Math.random()*500;
+        this.y=Math.random()*500;
+    }
+}).onMousePress(function(mouse){
+    if (mouse==engine.mouse_keys.MOUSE_LEFT){
+        this.destroy();
+    }
 });
-
-obj.onMousePress(function(mouse){
-    this.destroy();
-});*/
 
 var mousePos;
 engine.main(function(){

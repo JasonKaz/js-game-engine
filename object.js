@@ -4,7 +4,8 @@
             this.x=x;
             this.y=y;
             this.sprite=sprite;
-            this.onKeyDownFunction=this.onMousePressFunction=null;
+            this.onKeyPressFunction=this.onKeyUpFunction=this.onKeyDownFunction=null;
+            this.onMousePressFunction=this.onMouseUpFunction=this.onMouseDownFunction=null;
             this.destroyed=false;
         }
 
@@ -14,6 +15,17 @@
 
         Object.prototype.onKeyDown=function(f){
             this.onKeyDownFunction=f;
+            return this;
+        };
+
+        Object.prototype.onKeyPress=function(f){
+            this.onKeyPressFunction=f;
+            return this;
+        };
+
+        Object.prototype.onKeyUp=function(f){
+            this.onKeyUpFunction=f;
+            return this;
         };
 
         Object.prototype.onMousePress=function(f){
